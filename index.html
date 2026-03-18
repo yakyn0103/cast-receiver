@@ -19,11 +19,17 @@
     const playbackConfig = new cast.framework.PlaybackConfig();
 
     playbackConfig.manifestRequestHandler = requestInfo => {
-      requestInfo.headers = { 'Referer': 'https://www.dailymotion.com/' };
+      requestInfo.headers = { 
+          'Referer': 'https://www.dailymotion.com/',
+          'Origin': 'https://www.dailymotion.com'
+      };
     };
-
+    // Перехватываем запросы к самим .ts сегментам видео
     playbackConfig.segmentRequestHandler = requestInfo => {
-      requestInfo.headers = { 'Referer': 'https://www.dailymotion.com/' };
+      requestInfo.headers = { 
+          'Referer': 'https://www.dailymotion.com/',
+          'Origin': 'https://www.dailymotion.com'
+      };
     };
 
     context.start({playbackConfig: playbackConfig});
