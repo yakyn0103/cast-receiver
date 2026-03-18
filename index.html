@@ -1,63 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Debug Receiver</title>
-  <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-  <style>
-    body { margin: 0; background-color: #000; overflow: hidden; }
-    /* Окно для вывода ошибок прямо на телевизор */
-    #debug {
-      position: absolute; top: 5%; left: 5%; width: 90%; height: 90%;
-      color: #00FF00; font-family: monospace; font-size: 2.5vh;
-      background: rgba(0,0,0,0.85); z-index: 9999; overflow-y: auto; word-wrap: break-word;
-      padding: 20px; box-sizing: border-box;
-    }
-  </style>
+    <meta charset="utf-8">
+    <title>Sport En France Player</title>
+    <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+    <style>
+        /* Плеер на весь экран без рамок */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            overflow: hidden;
+        }
+        cast-media-player {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
 <body>
-  <cast-media-player></cast-media-player>
-  <div id="debug">📺 РЕСИВЕР ЗАПУЩЕН. Жду команду с телефона...<br></div>
+    <cast-media-player></cast-media-player>
 
-  <script>
-    const debugDiv = document.getElementById('debug');
-    function log(msg) {
-      debugDiv.innerHTML += msg + '<br>';
-      debugDiv.scrollTop = debugDiv.scrollHeight; // Автоскролл вниз
-    }
-
-    const context = cast.framework.CastReceiverContext.getInstance();
-    const playerManager = context.getPlayerManager();
-    const playbackConfig = new cast.framework.PlaybackConfig();
-
-    // 1. ЛОВИМ ОШИБКИ И ВЫВОДИМ НА ЭКРАН
-    playerManager.addEventListener(cast.framework.events.EventType.ERROR, (event) => {
-      log('<span style="color:red">🛑 ОШИБКА ПЛЕЕРА: ' + JSON.stringify(event.detailedErrorCode || event.error) + '</span>');
-    });
-
-    // 2. Логируем начало загрузки
-    playerManager.addEventListener(cast.framework.events.EventType.LOAD_START, () => {
-      log('⏳ Попытка загрузить видео...');
-    });
-
-    playbackConfig.manifestRequestHandler = requestInfo => {
-      log('🌐 Запрос 1 .m3u8: ' + requestInfo.url.substring(0, 60) + '...');
-      if (!requestInfo.headers) { requestInfo.headers = {}; }
-      requestInfo.headers['Referer'] = 'https://www.dailymotion.com/';
-      requestInfo.headers['Origin'] = 'https://www.dailymotion.com';
-      
-      return requestInfo; // <-- ВОТ ЭТО СЛОВО Я ЗАБЫЛ!
-    };
-
-    // 4. Перехватываем сегменты
-    playbackConfig.segmentRequestHandler = requestInfo => {
-      if (!requestInfo.headers) { requestInfo.headers = {}; }
-      requestInfo.headers['Referer'] = 'https://www.dailymotion.com/';
-      requestInfo.headers['Origin'] = 'https://www.dailymotion.com';
-      
-      return requestInfo; // <-- И ЗДЕСЬ ТОЖЕ
-    };
-
-    context.start({playbackConfig: playbackConfig});
-  </script>
+    <script>
+        const context = cast.framework.CastReceiverContext.getInstance();
+        context.start();
+    </script>
 </body>
 </html>
