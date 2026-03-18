@@ -40,7 +40,7 @@
     });
 
     playbackConfig.manifestRequestHandler = requestInfo => {
-      log('🌐 Запрос .m3u8: ' + requestInfo.url.substring(0, 60) + '...');
+      log('🌐 Запрос 1 .m3u8: ' + requestInfo.url.substring(0, 60) + '...');
       if (!requestInfo.headers) { requestInfo.headers = {}; }
       requestInfo.headers['Referer'] = 'https://www.dailymotion.com/';
       requestInfo.headers['Origin'] = 'https://www.dailymotion.com';
