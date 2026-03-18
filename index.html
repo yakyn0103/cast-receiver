@@ -1,35 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Custom Dailymotion Receiver</title>
+  <title>Debug Receiver</title>
   <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
   <style>
     body { margin: 0; background-color: #000; overflow: hidden; }
-    cast-media-player {
-      --theme-hue: 210;
-      --splash-image: url("https://sef.mytvchain.com/settings/34_1770639529.png");
+    /* Окно для вывода ошибок прямо на телевизор */
+    #debug {
+      position: absolute; top: 5%; left: 5%; width: 90%; height: 90%;
+      color: #00FF00; font-family: monospace; font-size: 2.5vh;
+      background: rgba(0,0,0,0.85); z-index: 9999; overflow-y: auto; word-wrap: break-word;
+      padding: 20px; box-sizing: border-box;
     }
   </style>
 </head>
 <body>
   <cast-media-player></cast-media-player>
+  <div id="debug">📺 РЕСИВЕР ЗАПУЩЕН. Жду команду с телефона...<br></div>
 
   <script>
+    const debugDiv = document.getElementById('debug');
+    function log(msg) {
+      debugDiv.innerHTML += msg + '<br>';
+      debugDiv.scrollTop = debugDiv.scrollHeight; // Автоскролл вниз
+    }
+
     const context = cast.framework.CastReceiverContext.getInstance();
+    const playerManager = context.getPlayerManager();
     const playbackConfig = new cast.framework.PlaybackConfig();
 
+    // 1. ЛОВИМ ОШИБКИ И ВЫВОДИМ НА ЭКРАН
+    playerManager.addEventListener(cast.framework.events.EventType.ERROR, (event) => {
+      log('<span style="color:red">🛑 ОШИБКА ПЛЕЕРА: ' + JSON.stringify(event.detailedErrorCode || event.error) + '</span>');
+    });
+
+    // 2. Логируем начало загрузки
+    playerManager.addEventListener(cast.framework.events.EventType.LOAD_START, () => {
+      log('⏳ Попытка загрузить видео...');
+    });
+
+    // 3. Перехватываем манифест (добавляем заголовки и логируем URL)
     playbackConfig.manifestRequestHandler = requestInfo => {
-      requestInfo.headers = { 
-          'Referer': 'https://www.dailymotion.com/',
-          'Origin': 'https://www.dailymotion.com'
-      };
+      log('🌐 Запрос .m3u8: ' + requestInfo.url.substring(0, 60) + '...');
+      requestInfo.headers = { 'Referer': 'https://www.dailymotion.com/', 'Origin': 'https://www.dailymotion.com' };
     };
-    // Перехватываем запросы к самим .ts сегментам видео
+
+    // 4. Перехватываем сегменты
     playbackConfig.segmentRequestHandler = requestInfo => {
-      requestInfo.headers = { 
-          'Referer': 'https://www.dailymotion.com/',
-          'Origin': 'https://www.dailymotion.com'
-      };
+      requestInfo.headers = { 'Referer': 'https://www.dailymotion.com/', 'Origin': 'https://www.dailymotion.com' };
     };
 
     context.start({playbackConfig: playbackConfig});
