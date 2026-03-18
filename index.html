@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Custom Dailymotion Receiver</title>
+  <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+  <style>
+    body { margin: 0; background-color: #000; overflow: hidden; }
+    cast-media-player {
+      --theme-hue: 210;
+      --splash-image: url("https://sef.mytvchain.com/settings/34_1770639529.png");
+    }
+  </style>
+</head>
+<body>
+  <cast-media-player></cast-media-player>
+
+  <script>
+    const context = cast.framework.CastReceiverContext.getInstance();
+    const playbackConfig = new cast.framework.PlaybackConfig();
+
+    playbackConfig.manifestRequestHandler = requestInfo => {
+      requestInfo.headers = { 'Referer': 'https://www.dailymotion.com/' };
+    };
+
+    playbackConfig.segmentRequestHandler = requestInfo => {
+      requestInfo.headers = { 'Referer': 'https://www.dailymotion.com/' };
+    };
+
+    context.start({playbackConfig: playbackConfig});
+  </script>
+</body>
+</html>
