@@ -39,15 +39,22 @@
       log('⏳ Попытка загрузить видео...');
     });
 
-    // 3. Перехватываем манифест (добавляем заголовки и логируем URL)
     playbackConfig.manifestRequestHandler = requestInfo => {
       log('🌐 Запрос .m3u8: ' + requestInfo.url.substring(0, 60) + '...');
-      requestInfo.headers = { 'Referer': 'https://www.dailymotion.com/', 'Origin': 'https://www.dailymotion.com' };
+      if (!requestInfo.headers) { requestInfo.headers = {}; }
+      requestInfo.headers['Referer'] = 'https://www.dailymotion.com/';
+      requestInfo.headers['Origin'] = 'https://www.dailymotion.com';
+      
+      return requestInfo; // <-- ВОТ ЭТО СЛОВО Я ЗАБЫЛ!
     };
 
     // 4. Перехватываем сегменты
     playbackConfig.segmentRequestHandler = requestInfo => {
-      requestInfo.headers = { 'Referer': 'https://www.dailymotion.com/', 'Origin': 'https://www.dailymotion.com' };
+      if (!requestInfo.headers) { requestInfo.headers = {}; }
+      requestInfo.headers['Referer'] = 'https://www.dailymotion.com/';
+      requestInfo.headers['Origin'] = 'https://www.dailymotion.com';
+      
+      return requestInfo; // <-- И ЗДЕСЬ ТОЖЕ
     };
 
     context.start({playbackConfig: playbackConfig});
