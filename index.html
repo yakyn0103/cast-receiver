@@ -27,14 +27,11 @@
         playerManager.setMessageInterceptor(
             cast.framework.messages.MessageType.LOAD,
             request => {
-                if (request.media) {
-                    const url = request.media.contentUrl || '';
-                    const type = request.media.contentType || '';
-
-                    if (url.includes('.m3u8') || type.includes('mpegurl')) {
-                        request.media.hlsSegmentFormat = cast.framework.messages.HlsSegmentFormat.FMP4;
-                        request.media.contentType = 'application/vnd.apple.mpegurl';
-                    }
+                if (request.media && request.media.contentUrl.includes('.m3u8')) {
+                    
+                    request.media.hlsSegmentFormat = cast.framework.messages.HlsSegmentFormat.TS;
+                    
+                    request.media.contentType = 'application/vnd.apple.mpegurl';
                 }
                 return request;
             }
