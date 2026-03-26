@@ -1,31 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Sport En France Player</title>
+    <title>Dailymotion CAF Receiver</title>
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
     <style>
-        /* Плеер на весь экран без рамок */
-        body, html {
+        body {
             margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: black;
             overflow: hidden;
+            background-color: #000;
         }
         cast-media-player {
-            width: 100%;
-            height: 100%;
+            --theme-hue: 210;
+            --splash-image-background: #000000;
         }
     </style>
 </head>
 <body>
     <cast-media-player></cast-media-player>
-
+    
     <script>
         const context = cast.framework.CastReceiverContext.getInstance();
-        context.start();
+        const playerManager = context.getPlayerManager();
+
+        const playbackConfig = new cast.framework.PlaybackConfig();
+
+        playerManager.setMessageInterceptor(
+            cast.framework.messages.MessageType.LOAD,
+            request => {
+                if (request.media) {
+                    const url = request.media.contentUrl || '';
+                    const type = request.media.contentType || '';
+
+                    if (url.includes('.m3u8') || type.includes('mpegurl')) {
+                        request.media.hlsSegmentFormat = cast.framework.messages.HlsSegmentFormat.FMP4;
+                        request.media.contentType = 'application/vnd.apple.mpegurl';
+                    }
+                }
+                return request;
+            }
+        );
+
+        context.start({ playbackConfig: playbackConfig });
     </script>
 </body>
 </html>
