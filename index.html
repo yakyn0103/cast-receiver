@@ -1,14 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Default Google Cast Receiver</title>
+    <title>PRO DEBUG RECEIVER</title>
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+    <script src="//www.gstatic.com/cast/sdk/libs/mediaplayer/v3/cast_media_player.js"></script>
 </head>
-<body style="margin: 0; background-color: #000;">
+<body style="margin: 0; background-color: #000; color: white; font-family: monospace;">
+    
+    <div id="status" style="position: absolute; top: 20px; left: 20px; font-size: 20px; z-index: 10; background: rgba(0,0,0,0.5);">
+        Waiting for stream...
+    </div>
+
     <cast-media-player></cast-media-player>
+
     <script>
+        const statusDiv = document.getElementById('status');
         const context = cast.framework.CastReceiverContext.getInstance();
-        context.start();
+        const playerManager = context.getPlayerManager();
+
+        if (window.shaka) {
+            shaka.log.setLevel(shaka.log.Level.DEBUG);
+            console.log("👉👉👉 SHAKA DEBUG ENABLED. VERSION: " + shaka.Player.version);
+        }
+
+        playerManager.addEventListener(cast.framework.events.EventType.ERROR, (event) => {
+            const errorDetail = event.detailedErrorCode;
+            const errorReason = event.error ? event.error.message : 'Unknown';
+            
+            console.error("👉👉👉 CRITICAL_PLAYER_ERROR_LOG");
+            console.error("Code:", errorDetail);
+            console.error("Reason:", errorReason);
+            console.error("Full Event:", JSON.stringify(event));
+            
+            statusDiv.innerHTML = `<span style="color: red;">ERROR: ${errorDetail}</span>`;
+        });
+
+        playerManager.setMessageInterceptor(
+            cast.framework.messages.MessageType.LOAD,
+            request => {
+                statusDiv.innerText = "Loading: " + request.media.contentId.substring(0, 30) + "...";
+                
+                if (request.media && request.media.contentUrl.includes('.m3u8')) {
+                    request.media.hlsSegmentFormat = undefined; 
+                    request.media.contentType = 'application/vnd.apple.mpegurl';
+                    console.log("👉👉👉 MP2T_OVERRIDE_APPLIED");
+                }
+                return request;
+            }
+        );
+
+        // 4. СТАРТ
+        const options = new cast.framework.CastReceiverOptions();
+        // Разрешаем логирование в системный поток
+        options.disableIdleTimeout = true; 
+
+        context.start(options);
     </script>
 </body>
 </html>
