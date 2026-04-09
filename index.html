@@ -10,9 +10,16 @@
     <script>
         const context = cast.framework.CastReceiverContext.getInstance();
         const playerManager = context.getPlayerManager();
+
         playerManager.setMessageInterceptor(
             cast.framework.messages.MessageType.LOAD,
             request => {
+                if (window.shaka && window.shaka.Player) {
+                    console.log("👉👉👉 SHAKA VERSION: " + shaka.Player.version);
+                } else {
+                    console.log("👉👉👉 SHAKA IS NOT GLOBALLY EXPOSED");
+                }
+
                 if (request.media && request.media.contentUrl.includes('.m3u8')) {
                     request.media.hlsSegmentFormat = undefined; 
                     request.media.contentType = 'application/vnd.apple.mpegurl';
@@ -21,8 +28,8 @@
             }
         );
 
-        playerManager.addEventListener(cast.framework.events.EventType.PLAYER_LOAD_COMPLETE, () => {
-            console.log("Shaka Version:", shaka.Player.version);
+        playerManager.addEventListener(cast.framework.events.EventType.ERROR, (event) => {
+            console.log("👉👉👉 PLAYER ERROR: ", JSON.stringify(event));
         });
 
         context.start();
