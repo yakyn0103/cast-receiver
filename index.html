@@ -1,45 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DM Custom Receiver - Shaka Force</title>
+    <title>Default Google Cast Receiver</title>
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-    <script src="//www.gstatic.com/cast/sdk/libs/mediaplayer/v3/cast_media_player.js"></script>
 </head>
-<body style="margin: 0; background-color: #000; overflow: hidden;">
-    <div id="tv-debug" style="position: absolute; top: 10%; left: 5%; color: lime; font-size: 35px; z-index: 9999; background: rgba(0,0,0,0.8); padding: 20px; font-family: monospace;">
-        DEBUGGING STARTED...
-    </div>
-
+<body style="margin: 0; background-color: #000;">
     <cast-media-player></cast-media-player>
-    
     <script>
-        const debugDiv = document.getElementById('tv-debug');
         const context = cast.framework.CastReceiverContext.getInstance();
-        const playerManager = context.getPlayerManager();
-
-        playerManager.setMessageInterceptor(
-            cast.framework.messages.MessageType.LOAD,
-            request => {
-                // ПИШЕМ ВЕРСИЮ НА ЭКРАН ТЕЛЕВИЗОРА
-                if (window.shaka && window.shaka.Player) {
-                    debugDiv.innerHTML += "<br>👉 SHAKA VER: " + shaka.Player.version;
-                } else {
-                    debugDiv.innerHTML += "<br>👉 SHAKA NOT EXPOSED";
-                }
-
-                if (request.media && request.media.contentUrl.includes('.m3u8')) {
-                    request.media.hlsSegmentFormat = undefined; 
-                    request.media.contentType = 'application/vnd.apple.mpegurl';
-                    debugDiv.innerHTML += "<br>👉 INJECTED MP2T FIX";
-                }
-                return request;
-            }
-        );
-
-        playerManager.addEventListener(cast.framework.events.EventType.ERROR, (event) => {
-            debugDiv.innerHTML += "<br>❌ ERROR: " + JSON.stringify(event);
-        });
-
         context.start();
     </script>
 </body>
