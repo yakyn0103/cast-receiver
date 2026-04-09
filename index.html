@@ -1,43 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dailymotion CAF Receiver</title>
+    <title>DM Custom Receiver - Shaka Force</title>
     <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #000;
-        }
-        cast-media-player {
-            --theme-hue: 210;
-            --splash-image-background: #000000;
-        }
-    </style>
+    <script src="//www.gstatic.com/cast/sdk/libs/mediaplayer/v3/cast_media_player.js"></script>
 </head>
-<body>
+<body style="margin: 0; background-color: #000;">
     <cast-media-player></cast-media-player>
-    
     <script>
         const context = cast.framework.CastReceiverContext.getInstance();
         const playerManager = context.getPlayerManager();
-
-        const playbackConfig = new cast.framework.PlaybackConfig();
-
         playerManager.setMessageInterceptor(
             cast.framework.messages.MessageType.LOAD,
             request => {
                 if (request.media && request.media.contentUrl.includes('.m3u8')) {
-                    
-                    request.media.hlsSegmentFormat = cast.framework.messages.HlsSegmentFormat.TS;
-                    
+                    request.media.hlsSegmentFormat = undefined; 
                     request.media.contentType = 'application/vnd.apple.mpegurl';
                 }
                 return request;
             }
         );
 
-        context.start({ playbackConfig: playbackConfig });
+        playerManager.addEventListener(cast.framework.events.EventType.PLAYER_LOAD_COMPLETE, () => {
+            console.log("Shaka Version:", shaka.Player.version);
+        });
+
+        context.start();
     </script>
 </body>
 </html>
